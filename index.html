@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>XOX WORLD — The Battle of X and O</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <!-- 3D WebGL Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Game Floating Top Navigation Bar (Always Visible) -->
+  <nav class="game-nav-bar glass-panel">
+    <div class="nav-brand">
+      <span class="nav-logo">XOX</span>
+      <span class="nav-tag">WORLD</span>
+    </div>
+    <div class="nav-menu">
+      <button id="nav-home-btn" class="nav-btn active"><span class="nav-icon">🏠</span> HOME</button>
+      <button id="nav-help-btn" class="nav-btn"><span class="nav-icon">📖</span> HOW TO PLAY</button>
+      <button id="nav-settings-btn" class="nav-btn"><span class="nav-icon">⚙️</span> SETTINGS</button>
+    </div>
+    <div class="nav-right">
+      <button id="nav-sound-btn" class="btn btn-icon-only" title="Toggle Sound">
+        <span id="sound-icon">🔊</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HOME SCREEN OVERLAY -->
+  <div id="home-screen" class="overlay home-overlay">
+    <div class="home-container animate-fade-in">
+      <div class="hero-title-group">
+        <div class="hero-badge">3D SKY ARENA</div>
+        <h1 class="hero-title">XOX WORLD</h1>
+        <p class="hero-subtitle">THE BATTLE OF X AND O</p>
+      </div>
+
+      <!-- 3D Interactive Game Mode Cards -->
+      <div class="cards-container">
+        <div id="card-pvc" class="game-card glass-card tilt-card" data-mode="pvc">
+          <div class="card-icon-badge">🤖</div>
+          <h2 class="card-title">PLAY WITH AI</h2>
+          <p class="card-desc">Challenge Blaze & Pulse's Minimax Intelligence</p>
+          <div class="card-footer">
+            <span class="card-btn-text">START BATTLE</span>
+            <span class="card-arrow">➔</span>
+          </div>
+        </div>
+
+        <div id="card-pvp" class="game-card glass-card tilt-card" data-mode="pvp">
+          <div class="card-icon-badge">👥</div>
+          <h2 class="card-title">PLAY WITH FRIEND</h2>
+          <p class="card-desc">Local 2 Player 3D Showdown</p>
+          <div class="card-footer">
+            <span class="card-btn-text">START BATTLE</span>
+            <span class="card-arrow">➔</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Side Selector Option -->
+      <div class="home-side-selector">
+        <span class="label">Side Choice:</span>
+        <div class="toggle-switch">
+          <button id="home-choose-x" class="toggle-btn active">Blaze (X)</button>
+          <button id="home-choose-o" class="toggle-btn">Pulse (O)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME HUD OVERLAY (Perimeter Docked - Zero Board Blockage) -->
+  <div id="hud" class="hud-container hidden">
+    <!-- Top HUD Header -->
+    <header class="top-bar glass-panel">
+      <div class="header-left">
+        <h1 class="hud-title">XOX WORLD</h1>
+        <span class="hud-subtitle">BATTLE ARENA</span>
+      </div>
+      
+      <!-- Current Status Badge -->
+      <div id="status-badge" class="status-badge status-x-turn">
+        <span id="status-icon" class="status-dot"></span>
+        <span id="status-text">PLAYER X TURN</span>
+      </div>
+
+      <div class="header-right">
+        <button id="hud-cam-btn" class="btn btn-icon-only" title="Reset Camera View">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scoreboard Floating Card (Top Right Perimeter - NEVER blocks board!) -->
+    <div class="scoreboard-container glass-panel">
+      <div class="score-box score-x">
+        <span class="score-label">X WINS</span>
+        <span id="score-x-val" class="score-value">0</span>
+      </div>
+      <div class="score-divider"></div>
+      <div class="score-box score-draws">
+        <span class="score-label">DRAWS</span>
+        <span id="score-draws-val" class="score-value">0</span>
+      </div>
+      <div class="score-divider"></div>
+      <div class="score-box score-o">
+        <span class="score-label">O WINS</span>
+        <span id="score-o-val" class="score-value">0</span>
+      </div>
+    </div>
+
+    <!-- Perimeter Result Banner (Top Center Perimeter - NEVER covers board!) -->
+    <div id="result-banner" class="result-banner glass-panel hidden animate-fade-down">
+      <span id="result-banner-icon" class="result-banner-icon">⚡</span>
+      <div class="result-banner-text">
+        <h3 id="result-banner-title" class="result-banner-title">PLAYER X WINS!</h3>
+        <p id="result-banner-desc" class="result-banner-desc">Tactical victory in XOX World.</p>
+      </div>
+      <button id="banner-play-again-btn" class="btn btn-primary btn-sm">
+        NEW MATCH
+      </button>
+    </div>
+
+    <!-- Bottom Controls Dock -->
+    <footer class="bottom-controls glass-panel">
+      <div class="control-row">
+        <div class="mode-pill">
+          <button id="hud-mode-pvc" class="pill-btn active">Vs AI</button>
+          <button id="hud-mode-pvp" class="pill-btn">2 Players</button>
+        </div>
+
+        <div id="side-select-pill" class="side-pill">
+          <button id="hud-choose-x" class="pill-btn active">X</button>
+          <button id="hud-choose-o" class="pill-btn">O</button>
+        </div>
+
+        <button id="new-game-btn" class="btn btn-primary">
+          <span>🔄 NEW MATCH</span>
+        </button>
+
+        <button id="reset-score-btn" class="btn btn-outline">
+          <span>Reset Score</span>
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- HOW TO PLAY MODAL OVERLAY -->
+  <div id="how-to-play-modal" class="overlay modal-overlay hidden">
+    <div class="modal-card glass-card animate-scale-up">
+      <div class="modal-header">
+        <h2>HOW TO PLAY XOX WORLD</h2>
+        <button id="close-help-btn" class="btn btn-icon-only">✕</button>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-badge">01</div>
+          <h3>CHOOSE YOUR HERO</h3>
+          <p>Select Blaze (X) or Pulse (O) to enter the 3D Sky Arena.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-badge">02</div>
+          <h3>TARGET 3D TILES</h3>
+          <p>Hover over empty cells to preview your 3D ghost piece before placing.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-badge">03</div>
+          <h3>ALIGN 3 IN A ROW</h3>
+          <p>Connect 3 pieces horizontally, vertically, or diagonally to trigger the energy beam.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-badge">04</div>
+          <h3>CLAIM ARENA VICTORY</h3>
+          <p>Outsmart the Minimax AI or your friend to climb the scoreboard!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL OVERLAY -->
+  <div id="settings-modal" class="overlay modal-overlay hidden">
+    <div class="modal-card glass-card animate-scale-up settings-card">
+      <div class="modal-header">
+        <h2>GAME SETTINGS</h2>
+        <button id="close-settings-btn" class="btn btn-icon-only">✕</button>
+      </div>
+
+      <div class="settings-list">
+        <div class="setting-row">
+          <span>Sound Effects (SFX)</span>
+          <button id="setting-sound-toggle" class="btn btn-secondary btn-sm">ON</button>
+        </div>
+        <div class="setting-row">
+          <span>Animation Speed</span>
+          <button id="setting-speed-toggle" class="btn btn-secondary btn-sm">NORMAL</button>
+        </div>
+        <div class="setting-row">
+          <span>Camera View</span>
+          <button id="setting-reset-cam" class="btn btn-secondary btn-sm">RESET</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
